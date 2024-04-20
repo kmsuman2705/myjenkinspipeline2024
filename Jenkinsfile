@@ -20,5 +20,11 @@ pipeline {
                 echo "test my final webapp"
             }
         }
+	stage('Deploy to Prod') {
+            steps {
+                echo "my final webapp to prod"
+            }
+        }
+
     }
 }
