@@ -25,7 +25,10 @@ pipeline {
         }
          stage('Push Image to Docker HUB') {
             steps {
-                sh "docker login -u kmsuman27 -p 12345"
+                withCredentials([string(credentialsId: 'DOCKER_HUB_PWD', variable: 'DOCKER_HUB_PASS_CODE')]) {
+    // some block
+}
+                sh "docker login -u kmsuman27 -p $DOCKER_HUB_PWD"
                 sh "docker push hellotestingimage1:${BUILD_TAG}"
             }
         }
