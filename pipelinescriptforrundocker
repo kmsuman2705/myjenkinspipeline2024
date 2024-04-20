@@ -19,7 +19,14 @@ pipeline {
         
         stage('Build Docker Own image') {
             steps {
-                sh 'sudo docker build -t hellotestimage1 .'
+                sh "sudo docker build -t hellotestimage1:${BUILD_TAG} ."
+                //sh 'whoami'
+            }
+        }
+         stage('Push Image to Docker HUB') {
+            steps {
+                sh "docker login -u kmsuman27 -p 12345"
+                sh "docker push hellotestingimage1:${BUILD_TAG}"
             }
         }
     }
