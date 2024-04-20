@@ -16,20 +16,19 @@ pipeline {
             }
         }
         
-        
         stage('Build Docker Own image') {
             steps {
-                sh "sudo docker build -t hellotestimage1:${BUILD_TAG} ."
-                //sh 'whoami'
+                sh "sudo docker build -t javaweb:${BUILD_TAG} ."
             }
         }
-         stage('Push Image to Docker HUB') {
+        
+        stage('Push Image to Docker HUB') {
             steps {
-                withCredentials([string(credentialsId: 'DOCKER_HUB_PWD', variable: 'DOCKER_HUB_PASS_CODE')]) {
-    // some block
-}
-                sh "docker login -u kmsuman27 -p $DOCKER_HUB_PWD"
-                sh "docker push hellotestingimage1:${BUILD_TAG}"
+                withCredentials([string(credentialsId: 'DOCKER_HUB_PASS_CODE', variable: 'DOCKER_HUB_PASS_CODE')]) {
+                    sh "sudo docker login -u kmsuman27 -p $DOCKER_HUB_PASS_CODE"
+                    sh "sudo docker tag javaweb:${BUILD_TAG} kmsuman27/javaweb:${BUILD_TAG}"
+                    sh "sudo docker push kmsuman27/javaweb:${BUILD_TAG}"
+                }
             }
         }
     }
