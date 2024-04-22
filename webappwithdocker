@@ -1,0 +1,49 @@
+pipeline {
+    agent {
+        label "linuxlabelnode"
+    }
+    
+    stages {
+        stage('SCM') {
+            steps {
+                git 'https://github.com/vimallinuxworld13/jenkins-docker-maven-java-webapp.git'
+            }
+        }
+        
+        stage('Build by Maven Package') {
+            steps {
+                sh 'mvn clean package'
+            }
+        }
+        
+        stage('Build Docker Own image') {
+            steps {
+                sh "sudo docker build -t javaweb:${BUILD_TAG} ."
+            }
+        }
+        
+        stage('Push Image to Docker HUB') {
+            steps {
+                withCredentials([string(credentialsId: 'DOCKER_HUB_PASS_CODE', variable: 'DOCKER_HUB_PASS_CODE')]) {
+                    sh "sudo docker login -u kmsuman27 -p $DOCKER_HUB_PASS_CODE"
+                    sh "sudo docker tag javaweb:${BUILD_TAG} kmsuman27/javaweb:${BUILD_NUMBER}"
+                    sh "sudo docker push kmsuman27/javaweb:${BUILD_NUMBER}"
+                }
+            }
+        }
+        stage('Deloy webAPP in DEV Env') {
+            steps {
+                sh 'sudo docker rm -f myjavaapp'
+                sh "sudo docker run -d -p 8080:8080 --name myjavaapp -t javaweb:${BUILD_TAG}"
+            }
+        }
+         stage('Deloy webAPP in QA/Test Env') {
+            steps {
+               sshagent(['QA_ENV_SSH_CRED']) {
+                    sh "ssh -o StrictHostKeyChecking=no ec2@13.232.103.246 sudo docker rm -f myjavaapp"
+                    sh "ssh ec2-user@13.232.103.246 sudo docker run -d -p 8080:8080 --name myjavaapp -t javaweb:${BUILD_TAG}"
+                }
+            }
+        }
+    }
+}
